@@ -1,0 +1,44 @@
+version: "3"
+services:
+  node-app:
+    build: .
+    container_name: "my_node"
+    networks:
+      - i-network
+    depends_on:
+      - mongodb
+      - redis
+    command: ["./wait-for-it.sh", "mongodb:27017", "--", "npm", "start"]
+    ports:
+      - "8080:8080"
+
+  mongodb:
+    image: mongo
+    container_name: "my-mongodb"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    networks:
+      - i-network
+    ports:
+      - 27017:27017
+  
+  redis:
+    container_name: "my-redis"
+    image: redis:3.2.11
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - i-network
+    # environment:
+    #   - REDIS_PORT_6379_TCP_ADDR:"i-network:6379"
+    ports:
+      - "6379:6379"
+
+networks:
+  i-network:
+
+volumes:
+  redis-data:
